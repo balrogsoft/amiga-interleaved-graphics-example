@@ -1,0 +1,12 @@
+CC=sc
+OBJS=  Engine.o
+
+all: Engine
+
+clean:
+   delete \#?.o \#?.lnk \#?.map \#?.gst Engine
+
+Engine: $(OBJS)
+	slink lib:c.o $(OBJS) lib lib:sc.lib to $@
+
+Engine.o: Engine.c
