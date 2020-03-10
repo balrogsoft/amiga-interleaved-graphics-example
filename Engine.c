@@ -1,3 +1,6 @@
+// Ejemplo para blitear todos los planos de un gráfico de una sola operación
+// El gráfico de los tiles tiene un tamaño de 208x112x4 planos, más su máscara
+// Para usar con la herramienta: http://aminet.net/package/gfx/conv/iff2bitplanes
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -132,6 +135,8 @@ void HardWaitBlitter(void)
 // Draw a block with mask of 16x16 pixels
 void bm_drawBlock(UBYTE *orig, UBYTE *dest, WORD x, WORD y, WORD tile)
 {
+    // Esto se puede optimizar mucho más, las multiplicaciones de WBLOCK * BLOCKSBYTESPERLINE * PLANES * 2 se pueden calcular y dejar el valor fijo
+    // e incluso crear un array con los punteros de cada tile
     LONG orig_offset = ((tile % LINEBLOCKS) << 1) + ((tile / LINEBLOCKS) * WBLOCK * BLOCKSBYTESPERLINE * PLANES * 2);
     LONG dest_offset = ((x >> 3) & 0xFFFE) + (y * BITMAPLINEBYTESI);
 
@@ -144,7 +149,7 @@ void bm_drawBlock(UBYTE *orig, UBYTE *dest, WORD x, WORD y, WORD tile)
     custom->bltamod = 50; // El salto para encontrar la siguiente linea del bloque a pintar son 24 bytes para saltar a la siguiente linea + 26 bytes de la línea de la mascara = 50 bytes
     custom->bltbmod = 50;
     
-    custom->bltcmod = BITMAPLINEBYTES - 2; // El salto para la siguiente línea en pantalla son 40 bytes menos los dos bytes del bloque que pintamos
+    custom->bltcmod = BITMAPLINEBYTES - 2; // El salto para la siguiente línea del siguiente plano en pantalla son 40 bytes menos los dos bytes del bloque que pintamos
     custom->bltdmod = BITMAPLINEBYTES - 2;
     
     custom->bltapt  = orig + orig_offset + BLOCKSBYTESPERLINE;  // Máscara, orig_offset apunta a la primera línea del bitmap a pintar, 
@@ -281,6 +286,7 @@ int main()
 
     FreeMem(ptr0, PLANES*((WIDTH*HEIGHT)/8));
     FreeMem(tiles, TILES_SIZE);
+    FreeMem(map, MAP_SIZE);
     
 	return 0;
 }
